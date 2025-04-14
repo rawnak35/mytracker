@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class TransactionController {
 
     private TransactionsService transactionsService;
+
     @PostMapping("/create")
     public ResponseEntity<TransactionDto> create(@RequestBody TransactionDto transactionDto) {
         TransactionDto savedTrans = transactionsService.createTrans(transactionDto);
