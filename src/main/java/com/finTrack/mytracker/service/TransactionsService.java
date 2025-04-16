@@ -2,7 +2,6 @@ package com.finTrack.mytracker.service;
 
 
 import com.finTrack.mytracker.dto.TransactionDto;
-import com.finTrack.mytracker.dto.UserDto;
 
 import java.util.List;
 
@@ -12,6 +11,6 @@ public interface TransactionsService {
     List<TransactionDto> getByUsername(String username);
     List<TransactionDto> getAllTransactions();
     TransactionDto updateTransaction(Long id, TransactionDto updatedTrans);
-    void deleteTrans(Long id);
+    void deleteTransaction(Long id);
 
 }

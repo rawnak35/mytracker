@@ -21,8 +21,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        List<User> users = userRepository.findByUsername(userDto.getUsername());
-        if (!users.isEmpty()) {
+        User existUser = userRepository.findByUsername(userDto.getUsername());
+        if (existUser != null) {
             throw new ResourceAlreadyExistsException("username already in use.");
         }
         User user = UserMapper.mapToUser(userDto);
@@ -32,11 +32,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByUsername(String username) {
-        List<User> users = userRepository.findByUsername(username);
-        if (users.isEmpty()) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
             throw new ResourceNotFoundException("User does not exist with given username : " + username);
         }
-        return UserMapper.mapToUserDto(users.get(0));
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
@@ -53,11 +53,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(String username, UserDto updatedUserDto) {
-        List<User> users = userRepository.findByUsername(username);
-        if (users.isEmpty()) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
             throw new ResourceNotFoundException("User does not exist with given username : " + username);
         }
-        User user = users.get(0);
         user.setFirstName(updatedUserDto.getFirstName());
         user.setLastName(updatedUserDto.getLastName());
         user.setBirthDate(updatedUserDto.getBirthDate());

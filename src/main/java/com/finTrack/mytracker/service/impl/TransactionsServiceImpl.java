@@ -19,35 +19,52 @@ public class TransactionsServiceImpl implements TransactionsService {
 
     private TransactionRepository transactionsRepository;
     private UserRepository userRepository;
+
     @Override
     public TransactionDto createTrans(TransactionDto transDto) {
-       User user =  userRepository.findById(transDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User does not exist with given username" + transDto.getUserId()));
-       Transaction savedTrans = transactionsRepository.save(TransactionMapper.mapToTransaction(transDto, user));
-       return  TransactionMapper.mapToTransactionDto(savedTrans);
+        User user = userRepository.findByUsername(transDto.getUsername());
+        if(user == null){
+            throw new ResourceNotFoundException("User does not exist with given username" + transDto.getUsername());
+        }
+        Transaction savedTrans = transactionsRepository.save(TransactionMapper.mapToTransaction(transDto, user));
+        return TransactionMapper.mapToTransactionDto(savedTrans);
     }
 
     @Override
     public TransactionDto getById(Long id) {
-        return null;
+        Transaction transaction = transactionsRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Transaction does not exist with given id: " + id));
+        return TransactionMapper.mapToTransactionDto(transaction);
     }
 
     @Override
     public List<TransactionDto> getByUsername(String username) {
-        return List.of();
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new ResourceNotFoundException("User does not exist with given username: " + username);
+        }
+        List<Transaction> transaction = transactionsRepository.findByUserId(user.getId());
+        return transaction.stream().map(TransactionMapper::mapToTransactionDto).toList();
     }
 
     @Override
     public List<TransactionDto> getAllTransactions() {
-        return List.of();
+        return transactionsRepository.findAll().stream().map(TransactionMapper::mapToTransactionDto).toList();
     }
 
     @Override
     public TransactionDto updateTransaction(Long id, TransactionDto updatedTrans) {
-        return null;
+        Transaction transaction = transactionsRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Transaction does not exist with given id: " + id));
+        transaction.setAmount(updatedTrans.getAmount());
+        transaction.setCategory(updatedTrans.getCategory());
+        transaction.setTime(updatedTrans.getTime());
+        transaction.setDescription(updatedTrans.getDescription());
+        Transaction savedTran = transactionsRepository.save(transaction);
+        return TransactionMapper.mapToTransactionDto(savedTran);
     }
 
     @Override
-    public void deleteTrans(Long id) {
-
+    public void deleteTransaction(Long id) {
+        Transaction transaction = transactionsRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Transaction does not exist with given id: " + id));
+        transactionsRepository.delete(transaction);
     }
 }
