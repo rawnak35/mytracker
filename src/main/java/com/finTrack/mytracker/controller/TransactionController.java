@@ -1,6 +1,7 @@
 package com.finTrack.mytracker.controller;
 
 import com.finTrack.mytracker.dto.TransactionDto;
+import com.finTrack.mytracker.dto.ValueCountDto;
 import com.finTrack.mytracker.service.TransactionsService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,12 @@ public class TransactionController {
     public ResponseEntity<String> deleteTransaction(@PathVariable("id") Long id) {
         transactionsService.deleteTransaction(id);
         return ResponseEntity.ok("Transaction was deleted successfully");
+    }
+
+    @GetMapping("/categoriesAmount")
+    public  ResponseEntity<List<ValueCountDto>> getCategoriesAmount(){
+        List<ValueCountDto> res = transactionsService.getCategoriesTotalAmount();
+        return ResponseEntity.ok(res);
     }
 
 

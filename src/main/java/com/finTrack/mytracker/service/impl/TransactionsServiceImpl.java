@@ -1,8 +1,10 @@
 package com.finTrack.mytracker.service.impl;
 
 import com.finTrack.mytracker.dto.TransactionDto;
+import com.finTrack.mytracker.dto.ValueCountDto;
 import com.finTrack.mytracker.entity.Transaction;
 import com.finTrack.mytracker.entity.User;
+import com.finTrack.mytracker.entity.enums.Category;
 import com.finTrack.mytracker.exception.ResourceNotFoundException;
 import com.finTrack.mytracker.mapper.TransactionMapper;
 import com.finTrack.mytracker.repository.TransactionRepository;
@@ -11,6 +13,7 @@ import com.finTrack.mytracker.service.TransactionsService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -66,5 +69,16 @@ public class TransactionsServiceImpl implements TransactionsService {
     public void deleteTransaction(Long id) {
         Transaction transaction = transactionsRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Transaction does not exist with given id: " + id));
         transactionsRepository.delete(transaction);
+    }
+
+    @Override
+    public List<TransactionDto> getByCategory(Category category) {
+        List<Transaction> transactions = transactionsRepository.findByCategory(category);
+        return transactions.stream().map(TransactionMapper::mapToTransactionDto).toList();
+    }
+
+    @Override
+    public List<ValueCountDto> getCategoriesTotalAmount() {
+        return transactionsRepository.groupByCategory();
     }
 }
