@@ -1,14 +1,14 @@
 package com.finTrack.mytracker.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.finTrack.mytracker.dto.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-import java.time.OffsetDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
+
 
 /**
  * Enable adding message to error response
@@ -19,29 +19,42 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceAlreadyExists(ResourceAlreadyExistsException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponseDto> handleResourceAlreadyExists(ResourceAlreadyExistsException ex, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.CONFLICT);
 
-        Map<String, Object> errorBody = createErrorBody(HttpStatus.CONFLICT, ex, request);
-        return new ResponseEntity<>(errorBody, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFound(
+    public ResponseEntity<ErrorResponseDto> handleResourceNotFound(
             ResourceNotFoundException ex,
-            HttpServletRequest request) {
+            WebRequest webRequest) {
 
-        Map<String, Object> errorBody = createErrorBody(HttpStatus.NOT_FOUND, ex, request);
-        return new ResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
     }
 
-    private Map<String, Object> createErrorBody(HttpStatus httpStatus, RuntimeException ex, HttpServletRequest request) {
-        Map<String, Object> errorBody = new LinkedHashMap<>();
-        errorBody.put("timestamp", OffsetDateTime.now());
-        errorBody.put("status", httpStatus.value());
-        errorBody.put("error", httpStatus.getReasonPhrase());
-        errorBody.put("message", ex.getMessage()); // 👈 custom message
-        errorBody.put("path", request.getRequestURI());
-
-        return errorBody;
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleGlobalException(
+            Exception ex,
+            WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }
